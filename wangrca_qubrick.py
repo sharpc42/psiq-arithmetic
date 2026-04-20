@@ -7,7 +7,7 @@ class WangRCA(Qubrick):
 
     def _compute(self, a, b, num_qubits=1):
 
-        # initialize QPU and auxiliary qubits
+        # initialize auxiliary qubits
         aux = self.alloc_temp_qreg(
             num_qubits+1, 
             "aux",
