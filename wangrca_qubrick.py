@@ -26,14 +26,21 @@ class WangRCA(Qubrick):
         aux[0].write(0)
         # iterate through layers
         for idx in range(num_qubits):
+            print(f"{idx=}")
             # s2 layer
             a[idx].x(cond=aux[idx])    # c_j -> s_j
             b[idx].x(cond=aux[idx])    # b_j -> a_j
             # s1 layer
-            aux[idx+1].x(cond=b[idx+1])
-            a[idx].x(cond=a[idx+1])
-            b[idx+1].x(cond=a[idx+1])
-            a[idx+1].x(cond=a[idx] | b[idx+1])
+            if idx < num_qubits - 1:
+                aux[idx+1].x(cond=b[idx+1])
+                a[idx].x(cond=a[idx+1])
+                b[idx+1].x(cond=a[idx+1])
+                a[idx+1].x(cond=a[idx] | b[idx+1])
+        # final s1 layer
+        aux[-1].x(cond=b[-1])
+        a[-2].x(cond=a[-1])
+        b[-1].x(cond=a[-1])
+        a[-1].x(cond=a[-2] | b[-1])
         # final s2 layer
         a[-1].x(cond=aux[-1])
         b[-1].x(cond=aux[-1])
