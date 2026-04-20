@@ -30,5 +30,3 @@ class WangRCA(Qubrick):
         # final s2 layer
         a[-2].x(cond=aux[-1])
         b[-2].x(cond=aux[-1])
-
-        aux.release()
