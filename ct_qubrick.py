@@ -1,57 +1,41 @@
-"""
-CT2002 Quantum Full Adder as psiqworkbench Qubrick.
-
-Architecture follows AddBase pattern from:
-  psiqworkbench/qubricks/qbk_gidney_arithmetic.py
-"""
-
-from psiqworkbench import QPU, QUInt
+from psiqworkbench import QUInt
 from psiqworkbench.qubricks.qubrick import Qubrick
 from psiqworkbench.filter_presets import BIT_DEFAULT
 
 
 def ct_add_engine(qbk, A, B, C, n):
-    """CT2002 add: C ^= (A+B) mod 2^n. Within/apply inline.
-
-    Gate order matches paper equations (3)-(6):
-      gate 1: CCNOT(a_i, b_i,        carry_i)   eq(3)
-      gate 2: CNOT (a_i,             b_i)        eq(4)
-      gate 3: CCNOT(carry_{i-1}, b_i, carry_i)  eq(5)
-      gate 4: CNOT (carry_{i-1},     b_i)        eq(6)
-    Backward = same gates in reverse (all Hermitian).
-    """
     carry = qbk.alloc_temp_qreg(n + 1, "carry")
 
-    # WITHIN forward: QFA chain
+    # forward pass: compute sum bits into B, carry chain into carry
     for i in range(n):
-        carry[i+1].x(A[i] | B[i])      # gate 1
-        B[i].x(A[i])                    # gate 2
-        carry[i+1].x(carry[i] | B[i])  # gate 3
-        B[i].x(carry[i])               # gate 4
+        carry[i+1].x(A[i] | B[i])      # gate 1: CCnot
+        B[i].x(A[i])                    # gate 2: Cnot
+        carry[i+1].x(carry[i] | B[i])  # gate 3: CCnot
+        B[i].x(carry[i])               # gate 4: Cnot
 
-    # APPLY: XOR sum bits into C
+    # copy sum bits into output register
     for i in range(n):
         C[i].x(B[i])
 
-    # WITHIN backward: QFA† chain
+    # reverse pass: restore B and carry to original values
     for i in reversed(range(n)):
-        B[i].x(carry[i])               # gate 4†
-        carry[i+1].x(carry[i] | B[i]) # gate 3†
-        B[i].x(A[i])                   # gate 2†
-        carry[i+1].x(A[i] | B[i])     # gate 1†
+        B[i].x(carry[i])
+        carry[i+1].x(carry[i] | B[i])
+        B[i].x(A[i])
+        carry[i+1].x(A[i] | B[i])
 
     carry.release()
 
 
 class CTAdd(Qubrick):
-    """CT2002 out-of-place adder: C ^= (A + B) mod 2^n.
 
-    A and B are restored after compute().
-    carry ancilla allocated and released internally.
-
-    Usage:
-        adder = CTAdd()
-        adder.compute(A=A, B=B, C=C)
+    """
+    Implements the Cheng-Tseng (2002) quantum full adder. This is an
+    out-of-place adder. The form is C ^= (A + B) mod 2^n. The result
+    is stored in the C register, and the A and B registers are
+    unmodified. For larger registers, use a QPU initialized with the
+    BIT_DEFAULT filter preset to utilize the bit-vector simulator to
+    enable simulation of more qubits.
     """
 
     def __init__(self, add_engine=ct_add_engine, **kwargs):
