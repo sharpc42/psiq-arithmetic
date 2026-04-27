@@ -8,9 +8,9 @@ def test_add_one_bit():
     qpu.enable_qubit_allocation_debugging()
     a_val = 5
     b_val = 11
-    a = Qubits(num_qubits, "a", qpu=qpu)
+    a = Qubits(num_qubits + 1, "a", qpu=qpu)
     b = Qubits(num_qubits, "b", qpu=qpu)
-    a.write(a_val)
+    a.write(a_val << 1)  # shift left to make room for carry bit
     b.write(b_val)
     wrca.compute(a, b, num_qubits=num_qubits)
     result = a.read()
