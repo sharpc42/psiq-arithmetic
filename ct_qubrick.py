@@ -32,10 +32,11 @@ class CTAdd(Qubrick):
     """
     Implements the Cheng-Tseng (2002) quantum full adder. This is an
     out-of-place adder. The form is C ^= (A + B) mod 2^n. The result
-    is stored in the C register, and the A and B registers are
-    unmodified. For larger registers, use a QPU initialized with the
-    BIT_DEFAULT filter preset to utilize the bit-vector simulator to
-    enable simulation of more qubits.
+    is XOR'd into the C register. The A and B registers are restored
+    to their original values after the computation. For larger
+    registers, use a QPU initialized with the BIT_DEFAULT filter
+    preset to utilize the bit-vector simulator to enable simulation
+    of more qubits.
     """
 
     def __init__(self, add_engine=ct_add_engine, **kwargs):
