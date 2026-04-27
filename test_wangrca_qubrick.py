@@ -2,9 +2,10 @@ import wangrca_qubrick
 from psiqworkbench import QPU, Qubits
 
 def test_add_one_bit():
-    wrca = wangrca_qubrick.WangRCA()
+    wrca = wangrca_qubrick.WangAdd()
     num_qubits = 4
     qpu = QPU(num_qubits=3*num_qubits+1)
+    qpu.enable_qubit_allocation_debugging()
     a_val = 5
     b_val = 11
     a = Qubits(num_qubits, "a", qpu=qpu)
