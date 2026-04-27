@@ -1,10 +1,11 @@
 import wangrca_qubrick
 from psiqworkbench import QPU, Qubits
+from psiqworkbench.filter_presets import BIT_DEFAULT
 
 def test_add_one_bit():
     wrca = wangrca_qubrick.WangAdd()
     num_qubits = 4
-    qpu = QPU(num_qubits=3*num_qubits+1)
+    qpu = QPU(num_qubits=3*num_qubits+1, filters=BIT_DEFAULT)
     qpu.enable_qubit_allocation_debugging()
     a_val = 5
     b_val = 11
