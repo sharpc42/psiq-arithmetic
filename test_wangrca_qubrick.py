@@ -12,6 +12,6 @@ def test_add_one_bit():
     b = Qubits(num_qubits, "b", qpu=qpu)
     a.write(a_val << 1)  # shift left to make room for carry bit
     b.write(b_val)
-    wrca.compute(a, b, num_qubits=num_qubits)
+    wrca.compute(lhs=a, rhs=b, num_qubits=num_qubits)
     result = a.read()
     assert result == a_val + b_val, f"Expected {a_val + b_val}, got {result}"

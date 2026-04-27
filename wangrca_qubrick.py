@@ -1,36 +1,44 @@
 from psiqworkbench import Qubrick
+from psiqworkbench.qubricks import GidneyAdd
 
 class WangAdd(Qubrick):
+
+    """
+    Implements the Wang ripple-carry adder.
+    This is an out-of-place adder. The form is 
+    lhs += rhs. The result is stored in the lhs 
+    register with a carry qubit, and the rhs 
+    register is unmodified.
+    """
 
     def __init__(self, name=None, **kwargs):
         super().__init__(name, never_uncompute=True, **kwargs)
 
-    def _compute(self, a, b, num_qubits=1):
-
+    def _compute(self, lhs, rhs, num_qubits=1):
         # initialize auxiliary qubits
         aux = self.alloc_temp_qreg(
             num_qubits, 
             "aux",
             release_after_compute=True,
         )
-        c_0 = a[0]
+        c_0 = lhs[0]
         # initial s1 layer
-        aux[0].x(cond=b[0])
-        b[0].x(cond=a[1])
-        c_0.x(cond=a[1])
-        a[1].x(cond=b[0] | c_0)      # a_0 -> c_1
+        aux[0].x(cond=rhs[0])
+        rhs[0].x(cond=lhs[1])
+        c_0.x(cond=lhs[1])
+        lhs[1].x(cond=rhs[0] | c_0)      # a_0 -> c_1
         # iterate through layers
         for idx in range(num_qubits - 1):
-            a[idx].x(cond=aux[idx])        # c_j -> s_j
-            b[idx].x(cond=aux[idx])        # b_j -> a_j
+            lhs[idx].x(cond=aux[idx])        # c_j -> s_j
+            rhs[idx].x(cond=aux[idx])        # b_j -> a_j
             # s1 layer
-            aux[idx+1].x(cond=b[idx+1])
-            b[idx+1].x(cond=a[idx+2])
-            a[idx+1].x(cond=a[idx+2])
-            a[idx+2].x(cond=a[idx+1] | b[idx+1])
+            aux[idx+1].x(cond=rhs[idx+1])
+            rhs[idx+1].x(cond=lhs[idx+2])
+            lhs[idx+1].x(cond=lhs[idx+2])
+            lhs[idx+2].x(cond=lhs[idx+1] | rhs[idx+1])
         # final s2 layer
-        a[-2].x(cond=aux[-1])
-        b[-1].x(cond=aux[-1])
-
+        lhs[-2].x(cond=aux[-1])
+        rhs[-1].x(cond=aux[-1])
+        # uncompute auxiliary qubits
         aux.read()
         c_0.read()
