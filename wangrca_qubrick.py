@@ -1,6 +1,6 @@
 from psiqworkbench import Qubrick
 
-class WangRCA(Qubrick):
+class WangAdd(Qubrick):
 
     def __init__(self, name=None, **kwargs):
         super().__init__(name, never_uncompute=True, **kwargs)
@@ -22,7 +22,7 @@ class WangRCA(Qubrick):
         # initial s1 layer
         aux[0].x(cond=a[0] | b[0])
         c_0.x(cond=a[0])
-        a[0].x(cond=aux[0] ^ c_0)        # a_0 -> c_1
+        a[0].x(cond=aux[0] ^ c_0)      # a_0 -> c_1
         aux[0].write(0)
         # iterate through layers
         for idx in range(num_qubits):
