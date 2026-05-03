@@ -11,8 +11,8 @@ class ConsistencyResults:
         b = Qubits(num_qubits, "b", qpu=qpu)
         a.write(a_val)
         b.write(b_val)
-        self.adder.compute(lhs=a, rhs=b, num_qubits=num_qubits)
-        self.adder.uncompute()
+        with self.adder.computed(lhs=a, rhs=b, num_qubits=num_qubits) as result:
+            pass
         b_result = b.read()
         assert b_result == b_val, f"rhs was {b_val} before sum = lhs + rhs, now it is {b_result}"
     def test_lhs_consistency(self, num_qubits=4, a_val=5, b_val=11):
@@ -23,7 +23,7 @@ class ConsistencyResults:
         b = Qubits(num_qubits, "b", qpu=qpu)
         a.write(a_val)
         b.write(b_val)
-        self.adder.compute(lhs=a, rhs=b, num_qubits=num_qubits)
-        self.adder.uncompute()
+        with self.adder.computed(lhs=a, rhs=b, num_qubits=num_qubits) as result:
+            pass
         a_result = a.read()
         assert a_result == a_val, f"lhs was {a_val} before lhs += rhs, now it is {a_result}"

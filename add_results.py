@@ -11,10 +11,8 @@ class AddResults:
         b = Qubits(num_qubits, "b", qpu=qpu)
         a.write(a_val)
         b.write(b_val)
-        self.adder.compute(lhs=a, rhs=b, num_qubits=num_qubits)
-        result = self.adder.get_result_qreg()
-        self.adder.uncompute()
-        assert result == a_val + b_val, f"Expected {a_val + b_val}, got {result}"
+        with self.adder.computed(lhs=a, rhs=b, num_qubits=num_qubits) as result:
+            assert result == a_val + b_val, f"Expected {a_val + b_val}, got {result}"
     def test_adder_fifty_values(self):
         for i in range(1,50):
             for j in range(0,50):
