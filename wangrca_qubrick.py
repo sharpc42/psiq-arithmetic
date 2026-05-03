@@ -25,13 +25,15 @@ class WangAdd(Qubrick):
             rhs : Qubits, 
             num_qubits : int = 1
         ) -> None:
+
         if type(lhs) != Qubits or type(rhs) != Qubits:
             raise TypeError("lhs and rhs must be of type Qubits")
         required_qubits = len(lhs) + len(rhs) + num_qubits + 1 
         if lhs.qpu.num_qubits < required_qubits:
             raise ValueError(f"QPU has insufficient qubits for WangAdd."
-                             f"Required at least {required_qubits} total qubits."
+                             f"Need at least {required_qubits} total qubits."
                              f"Got {lhs.qpu.num_qubits}.")
+        
         # initialize carry qubit
         c_0 = self.alloc_temp_qreg(1, "carry")[0]
         self.set_result_qreg(lhs)
@@ -40,6 +42,7 @@ class WangAdd(Qubrick):
             num_qubits, 
             "aux",
         )
+
         # initial s1 layer
         aux[0].x(cond=rhs[0])
         rhs[0].x(cond=lhs[0])
