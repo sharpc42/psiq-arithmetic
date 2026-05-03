@@ -1,4 +1,4 @@
-from wangrca_qubrick import WangAdd
+from qbk_wangrca import WangAdd
 from add_results import AddResults
 from add_consistency import ConsistencyResults
 
