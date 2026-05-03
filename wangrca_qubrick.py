@@ -20,14 +20,14 @@ class WangAdd(Qubrick):
     def _compute(
             self, 
             lhs : Qubits, 
-            rhs : int | Qubits, 
+            rhs : Qubits, 
             num_qubits : int = 1
         ) -> None:
+        self.set_result_qreg(lhs)
         # initialize auxiliary qubits
         aux = self.alloc_temp_qreg(
             num_qubits, 
             "aux",
-            release_after_compute=True,
         )
         c_0 = lhs[0]
         # initial s1 layer
@@ -47,6 +47,3 @@ class WangAdd(Qubrick):
         # final s2 layer
         lhs[-2].x(cond=aux[-1])
         rhs[-1].x(cond=aux[-1])
-        # uncompute auxiliary qubits
-        aux.read()
-        c_0.read()
