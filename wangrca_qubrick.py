@@ -20,7 +20,7 @@ class WangAdd(Qubrick):
     def _compute(
             self, 
             lhs : Qubits, 
-            rhs : Qubits, 
+            rhs : int | Qubits, 
             num_qubits : int = 1
         ) -> None:
         lhs_q = lhs
@@ -59,3 +59,5 @@ class WangAdd(Qubrick):
         # uncompute auxiliary qubits
         aux.read()
         c_0.read()
+        if isinstance(rhs, int):
+            rhs_q.read()
