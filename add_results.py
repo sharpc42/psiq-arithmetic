@@ -17,6 +17,7 @@ class AddResults:
         assert result == a_val + b_val, f"Expected {a_val + b_val}, got {result}"
     def test_adder_fifty_values(self):
         for i in range(1,50):
-            for j in range(1,50):
+            for j in range(0,50):
+                print(f"Fifty vals - Testing {i=} and {j=}")
                 num_qubits = max(i.bit_length(), j.bit_length(), (i+j).bit_length())
                 self.test_adder_one_value(num_qubits=num_qubits, a_val=i, b_val=j)
