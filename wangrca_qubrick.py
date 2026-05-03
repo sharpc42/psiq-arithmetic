@@ -15,7 +15,7 @@ class WangAdd(Qubrick):
     """
 
     def __init__(self, name=None, **kwargs):
-        super().__init__(name, never_uncompute=True, **kwargs)
+        super().__init__(name, **kwargs)
 
     def _compute(
             self, 
@@ -23,41 +23,30 @@ class WangAdd(Qubrick):
             rhs : int | Qubits, 
             num_qubits : int = 1
         ) -> None:
-        lhs_q = lhs
-        if isinstance(rhs, int):
-            rhs_q = self.alloc_temp_qreg(
-                num_qubits, 
-                "rhs", 
-                release_after_compute=True,
-            )
-        else:
-            rhs_q = rhs
         # initialize auxiliary qubits
         aux = self.alloc_temp_qreg(
             num_qubits, 
             "aux",
             release_after_compute=True,
         )
-        c_0 = lhs_q[0]
+        c_0 = lhs[0]
         # initial s1 layer
-        aux[0].x(cond=rhs_q[0])
-        rhs_q[0].x(cond=lhs_q[1])
-        c_0.x(cond=lhs_q[1])
-        lhs_q[1].x(cond=rhs_q[0] | c_0)        # a_0 -> c_1
+        aux[0].x(cond=rhs[0])
+        rhs[0].x(cond=lhs[1])
+        c_0.x(cond=lhs[1])
+        lhs[1].x(cond=rhs[0] | c_0)        # a_0 -> c_1
         # iterate through layers
         for idx in range(num_qubits - 1):  
-            lhs_q[idx].x(cond=aux[idx])      # c_j -> s_j
-            rhs_q[idx].x(cond=aux[idx])      # b_j -> a_j
+            lhs[idx].x(cond=aux[idx])      # c_j -> s_j
+            rhs[idx].x(cond=aux[idx])      # b_j -> a_j
             # s1 layer
-            aux[idx+1].x(cond=rhs_q[idx+1])
-            rhs_q[idx+1].x(cond=lhs_q[idx+2])
-            lhs_q[idx+1].x(cond=lhs_q[idx+2])
-            lhs_q[idx+2].x(cond=lhs_q[idx+1] | rhs_q[idx+1])
+            aux[idx+1].x(cond=rhs[idx+1])
+            rhs[idx+1].x(cond=lhs[idx+2])
+            lhs[idx+1].x(cond=lhs[idx+2])
+            lhs[idx+2].x(cond=lhs[idx+1] | rhs[idx+1])
         # final s2 layer
-        lhs_q[-2].x(cond=aux[-1])
-        rhs_q[-1].x(cond=aux[-1])
+        lhs[-2].x(cond=aux[-1])
+        rhs[-1].x(cond=aux[-1])
         # uncompute auxiliary qubits
         aux.read()
         c_0.read()
-        if isinstance(rhs, int):
-            rhs_q.read()
