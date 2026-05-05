@@ -1,4 +1,4 @@
-from psiqworkbench import Qubrick, Qubits
+from psiqworkbench import Qubrick, Qubits, QUInt
 from psiqworkbench.qubricks import GidneyAdd
 
 class WangAdd(Qubrick):
@@ -21,13 +21,14 @@ class WangAdd(Qubrick):
 
     def _compute(
             self, 
-            lhs : Qubits, 
-            rhs : Qubits, 
+            lhs : QUInt | Qubits, 
+            rhs : QUInt | Qubits,
             num_qubits : int = 1
         ) -> None:
 
-        if type(lhs) != Qubits or type(rhs) != Qubits:
-            raise TypeError("lhs and rhs must be of type Qubits")
+        if ((type(lhs) != Qubits and type(lhs) != QUInt) 
+            or type(rhs) != Qubits and type(rhs) != QUInt):
+            raise TypeError("lhs and rhs must be of type QUInt or Qubits")
         required_qubits = len(lhs) + len(rhs) + num_qubits + 1 
         if lhs.qpu.num_qubits < required_qubits:
             raise ValueError(f"QPU has insufficient qubits for WangAdd."
