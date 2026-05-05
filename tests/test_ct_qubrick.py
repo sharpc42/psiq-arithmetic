@@ -1,10 +1,10 @@
-import ct_qubrick
+from src.qbk_ct import CTAdd
 from psiqworkbench import QPU, QUInt
 from psiqworkbench.filter_presets import BIT_DEFAULT
 
 
 def test_adder_one_value(num_qubits=4, a_val=5, b_val=6):
-    ct = ct_qubrick.CTAdd()
+    ct = CTAdd()
     qpu = QPU(num_qubits=4 * num_qubits + 2, filters=BIT_DEFAULT)
     qpu.enable_qubit_allocation_debugging()
     a = QUInt(num_qubits, "a", qpu=qpu)
