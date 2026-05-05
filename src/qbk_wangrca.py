@@ -34,6 +34,8 @@ class WangAdd(Qubrick):
             raise ValueError(f"QPU has insufficient qubits for WangAdd."
                              f"Need at least {required_qubits} total qubits."
                              f"Got {lhs.qpu.num_qubits}.")
+        if lhs.num_qubits != rhs.num_qubits:
+            raise ValueError("WangAdd requires lhs and rhs to have same number of qubits.")
         
         # initialize carry qubit
         c_0 = self.alloc_temp_qreg(1, "carry")[0]
