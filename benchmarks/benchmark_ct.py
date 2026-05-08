@@ -54,7 +54,7 @@ def _make_plot(ax, n_arr, measured, ideal, title, ylabel, ideal_label):
     ax.plot(n_arr, ideal,    "--", color="darkorange", linewidth=2.5,
             label=f"Ideal: {ideal_label}")
     ax.set_title(title, fontsize=20)
-    ax.set_xlabel("n (register width in bits)", fontsize=16)
+    ax.set_xlabel("Input Size (n)", fontsize=16)
     ax.set_ylabel(ylabel, fontsize=16)
     ax.legend(fontsize=14)
     ax.tick_params(axis="both", labelsize=14)
