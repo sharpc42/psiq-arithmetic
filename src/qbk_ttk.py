@@ -6,7 +6,7 @@ benchmarking, plotting, or end-to-end validation code from the larger script.
 
 from __future__ import annotations
 
-from psiqworkbench import QUInt, Qubrick
+from psiqworkbench import QUInt, Qubits, Qubrick
 
 
 class TTKAdd(Qubrick):
@@ -18,38 +18,42 @@ class TTKAdd(Qubrick):
     Requires b.num_qubits = a.num_qubits + 1 for carry
     """
 
-    def _compute(self, a: QUInt, b: QUInt, ctrl=None) -> None:
+    def _compute(
+            self, 
+            rhs: QUInt | Qubits, 
+            lhs: QUInt | Qubits, 
+            ctrl=None
+        ) -> None:
         condition = 0 if ctrl is None else ctrl
 
-        n = a.num_qubits
-        z = b[n]
+        n = lhs.num_qubits
+        z = rhs[n]
         if n == 0:
             return
         if n == 1:
-            z[0].x(a[0] | b[0] | condition)
-            b[0].x(a[0] | condition)
+            z[0].x(lhs[0] | rhs[0] | condition)
+            rhs[0].x(lhs[0] | condition)
             return
 
         for i in range(1, n):
-            b[i].x(a[i] | condition)
+            rhs[i].x(lhs[i] | condition)
 
         for i in range(n - 1, 0, -1):
-            target = z[0] if i == n - 1 else a[i + 1]
-            target.x(a[i] | condition)
+            target = z[0] if i == n - 1 else lhs[i + 1]
+            target.x(lhs[i] | condition)
 
         for i in range(n):
-            target = z[0] if i == n - 1 else a[i + 1]
-            target.x(a[i] | b[i] | condition)
+            target = z[0] if i == n - 1 else lhs[i + 1]
+            target.x(lhs[i] | rhs[i] | condition)
 
         for i in range(n - 1, 0, -1):
-            b[i].x(a[i] | condition)
-            a[i].x(a[i - 1] | b[i - 1] | condition)
+            rhs[i].x(lhs[i] | condition)
+            lhs[i].x(lhs[i - 1] | rhs[i - 1] | condition)
 
         for i in range(1, n - 1):
-            a[i + 1].x(a[i] | condition)
+            lhs[i + 1].x(lhs[i] | condition)
 
         for i in range(n):
-            b[i].x(a[i] | condition)
-
+            rhs[i].x(lhs[i] | condition)
 
 __all__ = ["TTKAdd"]
