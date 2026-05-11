@@ -6,29 +6,33 @@ import matplotlib.pyplot as plt
 class BenchmarkResults:
     adder = None
     adder_name = ""
-    def create_benchmark_plots(self):
+    def create_benchmark_plots(self, a=1, b=0, c=1, d=0, in_place=False):
         qubits_arr    = []
         toffs_arr     = []
         qubits_theory = []
         toffs_theory  = []
-        b_val = 1
+        rhs_val = 1
         max_qubits = 50
         for n in range(1,max_qubits):
-            a_val = int(2**n) - 2
+            lhs_val = int(2**n) - 2
             # num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
-            qpu = QPU(num_qubits=3*n+1, filters=BIT_DEFAULT)
+            qpu = QPU(num_qubits = a*n + b, filters=BIT_DEFAULT)
             qpu.enable_qubit_allocation_debugging()
-            a = Qubits(n, "a", qpu=qpu)
-            b = Qubits(n, "b", qpu=qpu)
-            a.write(a_val)
-            b.write(b_val)
-            self.adder.compute(lhs=a, rhs=b, num_qubits=n)
+            if not in_place:
+                lhs = Qubits(n, "lhs", qpu=qpu)
+            else:
+                lhs = Qubits(n + 1, "lhs", qpu=qpu)
+            rhs = Qubits(n, "rhs", qpu=qpu)
+            lhs.write(lhs_val)
+            rhs.write(rhs_val)
+            self.adder.compute(lhs=lhs, rhs=rhs, num_qubits=n)
             resources = resource_estimator(qpu).resources()
             qubits_arr.append(resources["qubit_highwater"])
             toffs_arr.append(resources["toffs"])
-            qubits_theory.append(3*n + 1)
-            toffs_theory.append(n)
+            qubits_theory.append(a*n + b)
+            toffs_theory.append(c*n + d)
         qubits = [n for n in range(1, max_qubits)]
+
         plt.style.use('seaborn-v0_8-whitegrid')
         plt.rcParams["legend.frameon"] = True
 
@@ -51,7 +55,7 @@ class BenchmarkResults:
             framealpha=1.0,
             fancybox=True,
         )
-        plt.savefig(f"{self.adder_name}_qubit.png")
+        plt.savefig(f"benchmarks/images/{self.adder_name}_qubit.png")
         plt.close()
 
         fig, ax = plt.subplots()
@@ -67,5 +71,5 @@ class BenchmarkResults:
             framealpha=1.0,
             fancybox=True,
         )
-        plt.savefig(f"{self.adder_name}_toffs.png")
+        plt.savefig(f"benchmarks/images/{self.adder_name}_toffs.png")
         plt.close()

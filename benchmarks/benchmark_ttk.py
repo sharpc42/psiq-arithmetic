@@ -4,14 +4,14 @@ from pathlib import Path
 # Add parent directory to path so imports work correctly
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.qbk_wangrca import WangAdd
+from src.qbk_ttk import TTKAdd
 from benchmark_check import BenchmarkResults
 
-class BenchmarkWangPlots(BenchmarkResults):
+class BenchmarkTTKPlots(BenchmarkResults):
     def __init__(self):
-        self.adder = WangAdd()
-        self.adder_name = "wang"
+        self.adder = TTKAdd()
+        self.adder_name = "ttk"
 
 if __name__ == "__main__":
-    bwp = BenchmarkWangPlots()
-    bwp.create_benchmark_plots(a=3, b=1)
+    bwp = BenchmarkTTKPlots()
+    bwp.create_benchmark_plots(a=2, b=1, c=2, d=-1, in_place=True)
