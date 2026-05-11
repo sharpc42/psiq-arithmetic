@@ -31,7 +31,7 @@ class AddResultsInPlace:
         a.write(a_val)
         b.write(b_val)
         # z.write(0)
-        self.adder.compute(a=a, b=b)
+        self.adder.compute(rhs=a, lhs=b)
         b_result = b.read()
         expected_sum = (a_val + b_val) % (1 << num_qubits)
         assert b_result == expected_sum, f"Expected sum {expected_sum}, got {b_result}"

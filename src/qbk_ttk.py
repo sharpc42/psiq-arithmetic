@@ -26,34 +26,34 @@ class TTKAdd(Qubrick):
         ) -> None:
         condition = 0 if ctrl is None else ctrl
 
-        n = lhs.num_qubits
-        z = rhs[n]
+        n = rhs.num_qubits
+        z = lhs[n]
         if n == 0:
             return
         if n == 1:
-            z[0].x(lhs[0] | rhs[0] | condition)
-            rhs[0].x(lhs[0] | condition)
+            z[0].x(rhs[0] | lhs[0] | condition)
+            lhs[0].x(rhs[0] | condition)
             return
 
         for i in range(1, n):
-            rhs[i].x(lhs[i] | condition)
+            lhs[i].x(rhs[i] | condition)
 
         for i in range(n - 1, 0, -1):
-            target = z[0] if i == n - 1 else lhs[i + 1]
-            target.x(lhs[i] | condition)
+            target = z[0] if i == n - 1 else rhs[i + 1]
+            target.x(rhs[i] | condition)
 
         for i in range(n):
-            target = z[0] if i == n - 1 else lhs[i + 1]
-            target.x(lhs[i] | rhs[i] | condition)
+            target = z[0] if i == n - 1 else rhs[i + 1]
+            target.x(rhs[i] | lhs[i] | condition)
 
-        for i in range(n - 1, 0, -1):
-            rhs[i].x(lhs[i] | condition)
-            lhs[i].x(lhs[i - 1] | rhs[i - 1] | condition)
+        for i in range(n - 1, 0,-1):
+            lhs[i].x(rhs[i] | condition)
+            rhs[i].x(rhs[i - 1] | lhs[i - 1] | condition)
 
         for i in range(1, n - 1):
-            lhs[i + 1].x(lhs[i] | condition)
+            rhs[i + 1].x(rhs[i] | condition)
 
         for i in range(n):
-            rhs[i].x(lhs[i] | condition)
+            lhs[i].x(rhs[i] | condition)
 
 __all__ = ["TTKAdd"]
