@@ -21,39 +21,40 @@ class TTKAdd(Qubrick):
     def _compute(
             self, 
             rhs: QUInt | Qubits, 
-            lhs: QUInt | Qubits, 
+            lhs: QUInt | Qubits,
+            num_qubits: int = 1, 
             ctrl=None
         ) -> None:
         condition = 0 if ctrl is None else ctrl
 
-        n = rhs.num_qubits
-        z = lhs[n]
-        if n == 0:
+        # num_qubits = rhs.num_qubits
+        z = lhs[num_qubits]
+        if num_qubits == 0:
             return
-        if n == 1:
+        if num_qubits == 1:
             z[0].x(rhs[0] | lhs[0] | condition)
             lhs[0].x(rhs[0] | condition)
             return
 
-        for i in range(1, n):
+        for i in range(1, num_qubits):
             lhs[i].x(rhs[i] | condition)
 
-        for i in range(n - 1, 0, -1):
-            target = z[0] if i == n - 1 else rhs[i + 1]
+        for i in range(num_qubits - 1, 0, -1):
+            target = z[0] if i == num_qubits - 1 else rhs[i + 1]
             target.x(rhs[i] | condition)
 
-        for i in range(n):
-            target = z[0] if i == n - 1 else rhs[i + 1]
+        for i in range(num_qubits):
+            target = z[0] if i == num_qubits - 1 else rhs[i + 1]
             target.x(rhs[i] | lhs[i] | condition)
 
-        for i in range(n - 1, 0,-1):
+        for i in range(num_qubits - 1, 0,-1):
             lhs[i].x(rhs[i] | condition)
             rhs[i].x(rhs[i - 1] | lhs[i - 1] | condition)
 
-        for i in range(1, n - 1):
+        for i in range(1, num_qubits - 1):
             rhs[i + 1].x(rhs[i] | condition)
 
-        for i in range(n):
+        for i in range(num_qubits):
             lhs[i].x(rhs[i] | condition)
 
 __all__ = ["TTKAdd"]

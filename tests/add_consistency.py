@@ -40,6 +40,6 @@ class ConsistencyResultsInPlace:
         a.write(a_val)
         b.write(b_val)
         # z.write(z_val)
-        self.adder.compute(rhs=a, lhs=b)
+        self.adder.compute(rhs=a, lhs=b, num_qubits=num_qubits)
         a_result = a.read()
         assert a_result == a_val, f"a was {a_val} before b += a, now it is {a_result}"
