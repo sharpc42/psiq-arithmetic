@@ -14,22 +14,20 @@ class TTKAdd(Qubrick):
 
     Register semantics:
       |b>|a>|z> -> |(a + b) mod 2^n>|a>|z xor carry_out>
+
+    Requires b.num_qubits = a.num_qubits + 1 for carry
     """
 
-    def _compute(self, a: QUInt, b: QUInt, z: QUInt, ctrl=None) -> None:
+    def _compute(self, a: QUInt, b: QUInt, ctrl=None) -> None:
         condition = 0 if ctrl is None else ctrl
 
-        if a.num_qubits != b.num_qubits:
-            raise ValueError("TTKAdd requires a and b to have equal width")
-        if z.num_qubits != 1:
-            raise ValueError("TTKAdd requires z to be exactly 1 qubit")
-
         n = a.num_qubits
+        z = b[n]
         if n == 0:
             return
         if n == 1:
-            b[0].x(a[0] | condition)
             z[0].x(a[0] | b[0] | condition)
+            b[0].x(a[0] | condition)
             return
 
         for i in range(1, n):

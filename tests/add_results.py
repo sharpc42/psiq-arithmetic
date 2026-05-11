@@ -21,22 +21,22 @@ class AddResultsOutOfPlace:
 
 class AddResultsInPlace:
     adder = None
-    def test_adder_one_value(self, a_val=5, b_val=11, z_val=0):
+    def test_adder_one_value(self, a_val=5, b_val=11):
         num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
         qpu = QPU(num_qubits=2*num_qubits+1, filters=BIT_DEFAULT)
         qpu.enable_qubit_allocation_debugging()
         a = QUInt(num_qubits, "a", qpu=qpu)
-        b = QUInt(num_qubits, "b", qpu=qpu)
-        z = QUInt(1, "z", qpu=qpu)
+        b = QUInt(num_qubits + 1, "b", qpu=qpu)
+        # z = QUInt(1, "z", qpu=qpu)
         a.write(a_val)
         b.write(b_val)
-        z.write(0)
-        self.adder.compute(a=a, b=b, z=z)
+        # z.write(0)
+        self.adder.compute(a=a, b=b)
         b_result = b.read()
         expected_sum = (a_val + b_val) % (1 << num_qubits)
         assert b_result == expected_sum, f"Expected sum {expected_sum}, got {b_result}"
-    def test_adder_many_values(self, z_val=0):
+    def test_adder_many_values(self):
         for i in range(1,150):
             for j in range(0,150):
                 print(f"Fifty vals - Testing {i=} and {j=}")
-                self.test_adder_one_value(a_val=i, b_val=j, z_val=z_val)
+                self.test_adder_one_value(a_val=i, b_val=j)
