@@ -19,24 +19,13 @@ class WangAdd(Qubrick):
     def __init__(self, name=None, **kwargs):
         super().__init__(name, **kwargs)
 
-    def _compute(
-            self, 
-            lhs : QUInt | Qubits, 
+    def _add(
+            self,
+            lhs : QUInt | Qubits,
             rhs : QUInt | Qubits,
-            num_qubits : int = 1
+            num_qubits : int = 1,
         ) -> None:
 
-        if ((type(lhs) != Qubits and type(lhs) != QUInt) 
-            or type(rhs) != Qubits and type(rhs) != QUInt):
-            raise TypeError("lhs and rhs must be of type QUInt or Qubits")
-        required_qubits = len(lhs) + len(rhs) + num_qubits + 1 
-        if lhs.qpu.num_qubits < required_qubits:
-            raise ValueError(f"QPU has insufficient qubits for WangAdd."
-                             f"Need at least {required_qubits} total qubits."
-                             f"Got {lhs.qpu.num_qubits}.")
-        if lhs.num_qubits != rhs.num_qubits:
-            raise ValueError("WangAdd requires lhs and rhs to have same number of qubits.")
-        
         # initialize carry qubit
         c_0 = self.alloc_temp_qreg(1, "carry")[0]
         self.set_result_qreg(lhs)
@@ -63,3 +52,23 @@ class WangAdd(Qubrick):
         # final s2 layer
         lhs[num_qubits - 2].x(cond=aux[-1])
         rhs[-1].x(cond=aux[-1])
+
+    def _compute(
+            self, 
+            lhs : QUInt | Qubits, 
+            rhs : QUInt | Qubits,
+            num_qubits : int = 1,
+        ) -> None:
+
+        if ((type(lhs) != Qubits and type(lhs) != QUInt) 
+            or type(rhs) != Qubits and type(rhs) != QUInt):
+            raise TypeError("lhs and rhs must be of type QUInt or Qubits")
+        required_qubits = len(lhs) + len(rhs) + num_qubits + 1 
+        if lhs.qpu.num_qubits < required_qubits:
+            raise ValueError(f"QPU has insufficient qubits for WangAdd."
+                             f"Need at least {required_qubits} total qubits."
+                             f"Got {lhs.qpu.num_qubits}.")
+        if lhs.num_qubits != rhs.num_qubits:
+            raise ValueError("WangAdd requires lhs and rhs to have same number of qubits.")
+        
+        self._add(lhs=lhs, rhs=rhs, num_qubits=num_qubits)
