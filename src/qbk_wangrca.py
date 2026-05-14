@@ -24,6 +24,7 @@ class WangAdd(Qubrick):
             lhs : QUInt | Qubits,
             rhs : QUInt | Qubits,
             num_qubits : int = 1,
+            subtract_condition : bool = False,
         ) -> None:
 
         # initialize carry qubit
@@ -38,6 +39,9 @@ class WangAdd(Qubrick):
         # initial s1 layer
         aux[0].x(cond=rhs[0])
         rhs[0].x(cond=lhs[0])
+        if subtract_condition:
+            c_0.x()
+            rhs.x()
         c_0.x(cond=lhs[0])
         lhs[0].x(cond=rhs[0] | c_0)        # a_0 -> c_1
         # iterate through layers
@@ -58,6 +62,7 @@ class WangAdd(Qubrick):
             lhs : QUInt | Qubits, 
             rhs : QUInt | Qubits,
             num_qubits : int = 1,
+            subtract_condition : bool = False,
         ) -> None:
 
         if ((type(lhs) != Qubits and type(lhs) != QUInt) 
@@ -71,4 +76,9 @@ class WangAdd(Qubrick):
         if lhs.num_qubits != rhs.num_qubits:
             raise ValueError("WangAdd requires lhs and rhs to have same number of qubits.")
         
-        self._add(lhs=lhs, rhs=rhs, num_qubits=num_qubits)
+        self._add(
+            lhs=lhs, 
+            rhs=rhs, 
+            num_qubits=num_qubits,
+            subtract_condition=subtract_condition,
+        )

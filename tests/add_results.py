@@ -3,7 +3,11 @@ from psiqworkbench.filter_presets import BIT_DEFAULT
 
 class AddResultsOutOfPlace:
     adder = None
-    def test_adder_one_value(self, a_val=5, b_val=11):
+    def test_adder_one_value(
+        self,
+        a_val=5, 
+        b_val=11
+    ):
         num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
         qpu = QPU(num_qubits=3*num_qubits+1, filters=BIT_DEFAULT)
         qpu.enable_qubit_allocation_debugging()
@@ -21,16 +25,18 @@ class AddResultsOutOfPlace:
 
 class AddResultsInPlace:
     adder = None
-    def test_adder_one_value(self, a_val=5, b_val=11):
+    def test_adder_one_value(
+        self, 
+        a_val=5, 
+        b_val=11
+    ):
         num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
         qpu = QPU(num_qubits=2*num_qubits+1, filters=BIT_DEFAULT)
         qpu.enable_qubit_allocation_debugging()
         a = QUInt(num_qubits, "a", qpu=qpu)
         b = QUInt(num_qubits + 1, "b", qpu=qpu)
-        # z = QUInt(1, "z", qpu=qpu)
         a.write(a_val)
         b.write(b_val)
-        # z.write(0)
         self.adder.compute(rhs=a, lhs=b, num_qubits=num_qubits)
         b_result = b.read()
         expected_sum = (a_val + b_val) % (1 << num_qubits)
@@ -38,5 +44,33 @@ class AddResultsInPlace:
     def test_adder_many_values(self):
         for i in range(1,150):
             for j in range(0,150):
-                print(f"Fifty vals - Testing {i=} and {j=}")
+                print(f"Many vals - Testing {i=} and {j=}")
                 self.test_adder_one_value(a_val=i, b_val=j)
+
+class SubtractResultsOutOfPlace:
+    adder = None
+    def test_subtract_one_value(
+        self,
+        a_val = 11,
+        b_val = 5,
+    ):
+        num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
+        qpu = QPU(num_qubits=3*num_qubits+1, filters=BIT_DEFAULT)
+        qpu.enable_qubit_allocation_debugging()
+        a = Qubits(num_qubits, "a", qpu=qpu)
+        b = Qubits(num_qubits, "b", qpu=qpu)
+        a.write(a_val)
+        b.write(b_val)
+        with self.adder.computed(
+            lhs = a, 
+            rhs = b, 
+            num_qubits = num_qubits,
+            subtract_condition = True,
+        ) as result:
+            assert result == a_val - b_val, f"Expected {a_val - b_val}, got {result}"
+    def test_subtract_many_values(self):
+        for i in range(1,150):
+            for j in range(1,150):
+                if i >= j:
+                    print(f"Many vals - Testing {i=} and {j=}")
+                    self.test_subtract_one_value(a_val=i, b_val=j)

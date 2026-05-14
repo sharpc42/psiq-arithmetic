@@ -3,7 +3,11 @@ from psiqworkbench.filter_presets import BIT_DEFAULT
 
 class ConsistencyResultsOutOfPlace:
     adder = None
-    def test_rhs_consistency(self, num_qubits=4, a_val=5, b_val=11):
+    def test_rhs_add_consistency(self, 
+                                 num_qubits=4, 
+                                 a_val=11, 
+                                 b_val=5,
+                                 subtract=False):
         num_qubits = (a_val + b_val).bit_length()
         qpu = QPU(num_qubits=3*num_qubits+1, filters=BIT_DEFAULT)
         qpu.enable_qubit_allocation_debugging()
@@ -11,11 +15,20 @@ class ConsistencyResultsOutOfPlace:
         b = Qubits(num_qubits, "b", qpu=qpu)
         a.write(a_val)
         b.write(b_val)
-        with self.adder.computed(lhs=a, rhs=b, num_qubits=num_qubits) as result:
+        with self.adder.computed(
+            lhs=a, 
+            rhs=b, 
+            num_qubits=num_qubits,
+            subtract_condition=subtract
+        ) as result:
             pass
         b_result = b.read()
         assert b_result == b_val, f"rhs was {b_val} before sum = lhs + rhs, now it is {b_result}"
-    def test_lhs_consistency(self, num_qubits=4, a_val=5, b_val=11):
+    def test_lhs_add_consistency(self,
+                                 num_qubits=4, 
+                                 a_val=11, 
+                                 b_val=5,
+                                 subtract=False):
         num_qubits = (a_val + b_val).bit_length()
         qpu = QPU(num_qubits=3*num_qubits+1, filters=BIT_DEFAULT)
         qpu.enable_qubit_allocation_debugging()
@@ -23,10 +36,19 @@ class ConsistencyResultsOutOfPlace:
         b = Qubits(num_qubits, "b", qpu=qpu)
         a.write(a_val)
         b.write(b_val)
-        with self.adder.computed(lhs=a, rhs=b, num_qubits=num_qubits) as result:
+        with self.adder.computed(
+            lhs=a, 
+            rhs=b, 
+            num_qubits=num_qubits,
+            subtract_condition=subtract,
+        ) as result:
             pass
         a_result = a.read()
         assert a_result == a_val, f"lhs was {a_val} before lhs += rhs, now it is {a_result}"
+    def test_rhs_sub_consistency(self):
+        self.test_rhs_add_consistency(subtract=True)
+    def test_lhs_sub_consistency(self):
+        self.test_lhs_add_consistency(subtract=True)
 
 class ConsistencyResultsInPlace:
     adder = None
