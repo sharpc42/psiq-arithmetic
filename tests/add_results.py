@@ -20,7 +20,6 @@ class AddResultsOutOfPlace:
     def test_adder_many_values(self):
         for i in range(1,150):
             for j in range(0,150):
-                print(f"Fifty vals - Testing {i=} and {j=}")
                 self.test_adder_one_value(a_val=i, b_val=j)
 
 class AddResultsInPlace:
@@ -44,7 +43,6 @@ class AddResultsInPlace:
     def test_adder_many_values(self):
         for i in range(1,150):
             for j in range(0,150):
-                print(f"Many vals - Testing {i=} and {j=}")
                 self.test_adder_one_value(a_val=i, b_val=j)
 
 class SubtractResultsOutOfPlace:
@@ -72,5 +70,4 @@ class SubtractResultsOutOfPlace:
         for i in range(1,150):
             for j in range(1,150):
                 if i >= j:
-                    print(f"Many vals - Testing {i=} and {j=}")
                     self.test_subtract_one_value(a_val=i, b_val=j)
