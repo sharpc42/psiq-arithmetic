@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ee522psiquantum"
+version = "0.1.0"
+description = "Quantum adder and multiplier qubricks for EE522psiquantum."
+readme = "docs/README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "psiqworkbench"
+]
+authors = [
+    {name = "Kush Aggarwal"},
+    {name = "Thomas Huang"},
+    {name = "Christopher Sharp"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Quantum Computing"
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
