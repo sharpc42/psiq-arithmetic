@@ -25,11 +25,15 @@ class WangAdd(Qubrick):
             rhs : QUInt | Qubits,
             num_qubits : int = 1,
             subtract_condition : bool = False,
+            result_is_sum_not_carry : bool = True,
         ) -> None:
 
         # initialize carry qubit
         c_0 = self.alloc_temp_qreg(1, "carry")[0]
-        self.set_result_qreg(lhs)
+        if result_is_sum_not_carry:
+            self.set_result_qreg(lhs)
+        else:
+            self.set_result_qreg(c_0)
         # initialize auxiliary qubits
         aux = self.alloc_temp_qreg(
             num_qubits, 
