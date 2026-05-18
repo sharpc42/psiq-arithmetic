@@ -1,5 +1,4 @@
 from psiqworkbench import Qubrick, Qubits, QUInt
-from psiqworkbench.qubricks import GidneyAdd
 
 class WangAdd(Qubrick):
 
