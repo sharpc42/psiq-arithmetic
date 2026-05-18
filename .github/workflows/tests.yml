@@ -1,5 +1,5 @@
-# .github/workflows/ci.yml
-name: ci
+# .github/workflows/tests.yml
+name: tests
 
 on:
   push:
