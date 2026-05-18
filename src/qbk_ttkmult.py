@@ -26,16 +26,16 @@ class TTKAddMultiply(Qubrick):
             release_after_compute=True
         )
         for k in range(factor1.num_qubits):
-            lhs = accumulator[k:]
-            num_qubits = lhs.num_qubits - 1
             aux.write(0)
             for i in range(factor2.num_qubits):
                 aux[i].x(factor2[i])
+            # update accumulator slice
             adder.compute(
-                lhs=lhs,
+                lhs=accumulator[k:],
                 rhs=aux,
-                num_qubits=num_qubits,
+                num_qubits=accumulator[k:].num_qubits - 1,
                 ctrl=factor1[k],
             )
+            # uncompute step
             for i in range(factor2.num_qubits):
                 aux[i].x(factor2[i])
