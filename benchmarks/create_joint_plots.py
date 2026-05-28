@@ -12,6 +12,7 @@ from psiqworkbench.qubricks.qbk_gidney_arithmetic import GidneyAdd, CuccaroAdd, 
 from src.qbk_jhha import JHHAMultiplier
 from src.qbk_ttkmult import TTKMultiplyAdd
 from psiqworkbench.qubricks.qbk_gidney_arithmetic import GidneyMultiplyAdd, CuccaroMultiplyAdd, NaiveMultiplyAdd
+from psiqworkbench.qubricks.qbk_gidney_arithmetic import OptimizedGidneyMultiplyAdd, OptimizedNaiveMultiplyAdd
 
 from psiqworkbench import QPU, Qubits
 from psiqworkbench.resource_estimation.qre import resource_estimator
@@ -28,40 +29,41 @@ def create_joint_plots_outofplace_adder(
     actvol_arr = []
     rhs_val = 1
     adders = [
-        "wang",
-        "ct",
-        "gidney",
-        "cuccaro",
-        # "naive",
+        "Wang",
+        "CT",
+        "Gidney",
+        "Cuccaro",
+        "Naive",
     ]
     adder = None
     for adder_name in adders:
+        drawn_circuit = False
         this_qubits_arr = []
         this_toffs_arr = []
         this_t_gate_arr = []
         this_actvol_arr = []
-        if adder_name == "wang":
+        if adder_name == "Wang":
             adder = WangAdd()
-        elif adder_name == "ct":
+        elif adder_name == "CT":
             adder = CTAdd()
-        elif adder_name == "gidney":
+        elif adder_name == "Gidney":
             adder = GidneyAdd()
-        elif adder_name == "cuccaro":
+        elif adder_name == "Cuccaro":
             adder = CuccaroAdd()
-        elif adder_name == "naive":
+        elif adder_name == "Naive":
             adder = NaiveAdd()
         for n in range(1,max_qubits):
             lhs_val = int(2**n) - 2
             # num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
             qpu = QPU(
                 num_qubits = 4*n + 10,
-                filters=[">>bit-sim>>", ">>toffoli-filter>>"])
+                filters=[">>buffer>>", ">>bit-sim>>", ">>toffoli-filter>>"])
             qpu.enable_qubit_allocation_debugging()
             lhs = Qubits(n, "lhs", qpu=qpu)
             rhs = Qubits(n, "rhs", qpu=qpu)
             lhs.write(lhs_val)
             rhs.write(rhs_val)
-            if adder_name == "gidney" or adder_name == "cuccaro" or adder_name == "naive":
+            if adder_name == "Gidney" or adder_name == "Cuccaro" or adder_name == "Naive":
                 adder.compute(lhs=lhs, rhs=rhs, alloc_result=True)
             else:
                 adder.compute(lhs=lhs, rhs=rhs, num_qubits=n)
@@ -72,6 +74,14 @@ def create_joint_plots_outofplace_adder(
                 resources["t_gates"] + 4*resources["toffs"] + resources["gidney_lelbows"]
             )
             this_actvol_arr.append(resources["active_volume"])
+            if n == 3 and drawn_circuit == False:
+                if adder_name == "Wang" or adder_name == "CT":
+                    qpu.draw(
+                        filename=f"benchmarks/images/{adder_name}_adder_circuit.svg", 
+                        format="svg",
+                        show_qubricks=True,
+                    )
+                    drawn_circuit = True
             adder.uncompute()
         qubits_arr.append(this_qubits_arr)
         toffs_arr.append(this_toffs_arr)
@@ -89,7 +99,7 @@ def create_joint_plots_outofplace_adder(
         ax.plot(
             qubits, 
             qubits_arr[i], 
-            label=f"{adder_name.capitalize()} (measured)"
+            label=f"{adder_name}"
         )
     ax.set_title("Logical Qubit Count vs n")
     ax.set_xlabel("Input Size (n)")
@@ -101,6 +111,7 @@ def create_joint_plots_outofplace_adder(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_outofplace_qubits.png")
     plt.close()
 
@@ -109,7 +120,7 @@ def create_joint_plots_outofplace_adder(
         ax.plot(
             qubits, 
             toffs_arr[i], 
-            label=f"{adder_name.capitalize()} (measured)"
+            label=f"{adder_name}"
         )
     ax.set_title("Toffoli Count vs n")
     ax.set_xlabel("Input Size (n)")
@@ -121,6 +132,7 @@ def create_joint_plots_outofplace_adder(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_outofplace_toffs.png")
     plt.close()
 
@@ -129,7 +141,7 @@ def create_joint_plots_outofplace_adder(
         ax.plot(
             qubits, 
             t_gate_arr[i], 
-            label=f"{adder_name.capitalize()} (measured)"
+            label=f"{adder_name}"
         )
     ax.set_title("T-Gate Count vs n")
     ax.set_xlabel("Input Size (n)")
@@ -141,6 +153,7 @@ def create_joint_plots_outofplace_adder(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_outofplace_tgates.png")
     plt.close()
 
@@ -149,7 +162,7 @@ def create_joint_plots_outofplace_adder(
         ax.plot(
             qubits, 
             actvol_arr[i], 
-            label=f"{adder_name.capitalize()} (measured)"
+            label=f"{adder_name}"
         )
     ax.set_title("Active Volume vs n")
     ax.set_xlabel("Input Size (n)")
@@ -161,6 +174,7 @@ def create_joint_plots_outofplace_adder(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_outofplace_actvol.png")
     plt.close()
 
@@ -176,35 +190,36 @@ def create_joint_plots_inplace_adder(
     rhs_val = 1
     adders = [
         "TTK",
-        "gayarthi",
-        "gidney",
-        "cuccaro",
-        # "naive"
+        "Gayarthi",
+        "Gidney",
+        "Cuccaro",
+        "Naive"
     ]
     adder = None
     for adder_name in adders:
+        drawn_circuit = False
         this_qubits_arr = []
         this_toffs_arr = []
         this_t_gate_arr = []
         this_actvol_arr = []
         if adder_name == "TTK":
             adder = TTKAdd()
-        elif adder_name == "gayarthi":
+        elif adder_name == "Gayarthi":
             adder = GayathriAdd()
-        elif adder_name == "gidney":
+        elif adder_name == "Gidney":
             adder = GidneyAdd()
-        elif adder_name == "cuccaro":
+        elif adder_name == "Cuccaro":
             adder = CuccaroAdd()
-        elif adder_name == "naive":
+        elif adder_name == "Naive":
             adder = NaiveAdd()
         for n in range(1,max_qubits):
             lhs_val = int(2**n) - 2
             # num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
             qpu = QPU(
                 num_qubits = 4*n + 10,
-                filters=[">>bit-sim>>", ">>toffoli-filter>>"])
+                filters=[">>buffer>>", ">>bit-sim>>", ">>toffoli-filter>>"])
             qpu.enable_qubit_allocation_debugging()
-            if adder_name == "gayarthi":
+            if adder_name == "Gayarthi":
                 lhs = Qubits(n, "lhs", qpu=qpu)
             else:
                 lhs = Qubits(n + 1, "lhs", qpu=qpu)
@@ -219,6 +234,14 @@ def create_joint_plots_inplace_adder(
                 resources["t_gates"] + 4*resources["toffs"] + 4*resources["gidney_lelbows"]
             )
             this_actvol_arr.append(resources["active_volume"])
+            if n == 3 and drawn_circuit == False:
+                if adder_name == "TTK" or adder_name == "Gayarthi":
+                    qpu.draw(
+                        filename=f"benchmarks/images/{adder_name}_adder_circuit.svg", 
+                        format="svg",
+                        show_qubricks=True,
+                    )
+                    drawn_circuit = True
             adder.uncompute()
         qubits_arr.append(this_qubits_arr)
         toffs_arr.append(this_toffs_arr)
@@ -236,7 +259,7 @@ def create_joint_plots_inplace_adder(
         ax.plot(
             qubits, 
             qubits_arr[i], 
-            label=f"{adder_name.capitalize()} (measured)"
+            label=f"{adder_name}"
         )
     ax.set_title("Logical Qubit Count vs n")
     ax.set_xlabel("Input Size (n)")
@@ -248,6 +271,7 @@ def create_joint_plots_inplace_adder(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_inplace_qubits.png")
     plt.close()
 
@@ -256,7 +280,7 @@ def create_joint_plots_inplace_adder(
         ax.plot(
             qubits, 
             toffs_arr[i], 
-            label=f"{adder_name.capitalize()} (measured)"
+            label=f"{adder_name}"
         )
     ax.set_title("Toffoli Count vs n")
     ax.set_xlabel("Input Size (n)")
@@ -268,6 +292,7 @@ def create_joint_plots_inplace_adder(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_inplace_toffs.png")
     plt.close()
 
@@ -276,7 +301,7 @@ def create_joint_plots_inplace_adder(
         ax.plot(
             qubits, 
             t_gate_arr[i], 
-            label=f"{adder_name.capitalize()} (measured)"
+            label=f"{adder_name}"
         )
     ax.set_title("T-Gate Count vs n")
     ax.set_xlabel("Input Size (n)")
@@ -288,6 +313,7 @@ def create_joint_plots_inplace_adder(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_inplace_tgates.png")
     plt.close()
 
@@ -296,7 +322,7 @@ def create_joint_plots_inplace_adder(
         ax.plot(
             qubits, 
             actvol_arr[i], 
-            label=f"{adder_name.capitalize()} (measured)"
+            label=f"{adder_name}"
         )
     ax.set_title("Active Volume vs n")
     ax.set_xlabel("Input Size (n)")
@@ -308,6 +334,7 @@ def create_joint_plots_inplace_adder(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_inplace_actvol.png")
     plt.close()
 
@@ -324,11 +351,14 @@ def create_joint_plots_multiplier(
     multipliers = [
         "TTK",
         "JHHA",
-        "cuccaro",
-        "gidney",
-        # "naive",
+        "Cuccaro",
+        "Gidney",
+        "Naive",
+        "OptimizedGidney",
+        "OptimizedNaive",
     ]
     for multiplier_name in multipliers:
+        drawn_circuit = False
         this_qubits_arr = []
         this_toffs_arr = []
         this_t_gate_arr = []
@@ -337,17 +367,21 @@ def create_joint_plots_multiplier(
             multiplier = TTKMultiplyAdd()
         elif multiplier_name == "JHHA":
             multiplier = JHHAMultiplier()
-        elif multiplier_name == "cuccaro":
+        elif multiplier_name == "Cuccaro":
             multiplier = CuccaroMultiplyAdd()
-        elif multiplier_name == "gidney":
+        elif multiplier_name == "Gidney":
             multiplier = GidneyMultiplyAdd()
-        elif multiplier_name == "naive":
+        elif multiplier_name == "Naive":
             multiplier = NaiveMultiplyAdd()
+        elif multiplier_name == "OptimizedGidney":
+            multiplier = OptimizedGidneyMultiplyAdd()
+        elif multiplier_name == "OptimizedNaive":
+            multiplier = OptimizedNaiveMultiplyAdd()
         for n in range(1, max_qubits):
             lhs_val = int(2**n) - 2
             qpu = QPU(
                 num_qubits = 6*n + 10,
-                filters=[">>bit-sim>>", ">>toffoli-filter>>"])
+                filters=[">>buffer>>", ">>bit-sim>>", ">>toffoli-filter>>"])
             qpu.enable_qubit_allocation_debugging()
             lhs = Qubits(n, "lhs", qpu=qpu)
             rhs = Qubits(n, "rhs", qpu=qpu)
@@ -385,6 +419,14 @@ def create_joint_plots_multiplier(
                 resources["t_gates"] + 4*resources["toffs"] + resources["gidney_lelbows"]
             )
             this_actvol_arr.append(resources["active_volume"])
+            if n == 3 and drawn_circuit == False:
+                if multiplier_name == "TTK" or multiplier_name == "JHHA":
+                    qpu.draw(
+                        filename=f"benchmarks/images/{multiplier_name}_multiplier_circuit.svg", 
+                        format="svg",
+                        show_qubricks=True,
+                    )
+                    drawn_circuit = True
             multiplier.uncompute()
         qubits_arr.append(this_qubits_arr)
         toffs_arr.append(this_toffs_arr)
@@ -402,7 +444,7 @@ def create_joint_plots_multiplier(
         ax.plot(
             qubits, 
             qubits_arr[i], 
-            label=f"{multiplier_name.capitalize()} (measured)"
+            label=f"{multiplier_name}"
         )
     ax.set_title("Logical Qubit Count vs n")
     ax.set_xlabel("Input Size (n)")
@@ -414,6 +456,7 @@ def create_joint_plots_multiplier(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_multiplier_qubits.png")
     plt.close()
 
@@ -422,7 +465,7 @@ def create_joint_plots_multiplier(
         ax.plot(
             qubits, 
             toffs_arr[i], 
-            label=f"{multiplier_name.capitalize()} (measured)"
+            label=f"{multiplier_name}"
         )
     ax.set_title("Toffoli Count vs n")
     ax.set_xlabel("Input Size (n)")
@@ -434,6 +477,7 @@ def create_joint_plots_multiplier(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_multiplier_toffs.png")
     plt.close()
 
@@ -442,7 +486,7 @@ def create_joint_plots_multiplier(
         ax.plot(
             qubits, 
             t_gate_arr[i], 
-            label=f"{multiplier_name.capitalize()} (measured)"
+            label=f"{multiplier_name}"
         )
     ax.set_title("T-Gate Count vs n")
     ax.set_xlabel("Input Size (n)")
@@ -454,6 +498,7 @@ def create_joint_plots_multiplier(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_multiplier_tgates.png")
     plt.close()
 
@@ -462,7 +507,7 @@ def create_joint_plots_multiplier(
         ax.plot(
             qubits, 
             actvol_arr[i], 
-            label=f"{multiplier_name.capitalize()} (measured)"
+            label=f"{multiplier_name}"
         )
     ax.set_title("Active Volume vs n")
     ax.set_xlabel("Input Size (n)")
@@ -474,6 +519,7 @@ def create_joint_plots_multiplier(
         framealpha=1.0,
         fancybox=True,
     )
+    plt.yscale("log")
     plt.savefig(f"benchmarks/images/test_joint_multiplier_actvol.png")
     plt.close()
 
