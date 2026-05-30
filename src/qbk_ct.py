@@ -43,8 +43,10 @@ class CTAdd(Qubrick):
         super().__init__(**kwargs)
         self.add_engine = add_engine
 
-    def _compute(self, A, B, C):
-        n = A.num_qubits
-        assert B.num_qubits == n and C.num_qubits == n, "Register sizes must match"
-        self.add_engine(self, A, B, C, n)
-        self.set_result_qreg(C)
+    def _compute(self, lhs, rhs, sum=None, num_qubits=None):
+        n = lhs.num_qubits if num_qubits is None else num_qubits
+        if sum is None:
+            sum = self.alloc_temp_qreg(n, "sum")
+        assert rhs.num_qubits == n and sum.num_qubits == n, "Register sizes must match"
+        self.add_engine(self, lhs, rhs, sum, n)
+        self.set_result_qreg(sum)

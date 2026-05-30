@@ -22,12 +22,12 @@ class TTKAdd(Qubrick):
             self, 
             rhs: QUInt | Qubits, 
             lhs: QUInt | Qubits,
-            num_qubits: int = 1, 
+            num_qubits: int | None = None,
             ctrl=None
         ) -> None:
         condition = 0 if ctrl is None else ctrl
 
-        # num_qubits = rhs.num_qubits
+        num_qubits = rhs.num_qubits if num_qubits is None else num_qubits
         z = lhs[num_qubits]
         if num_qubits == 0:
             return

@@ -1,7 +1,7 @@
 from psiqworkbench import Qubrick, Qubits, QUInt
 from .qbk_ttk import TTKAdd
 
-class TTKAddMultiply(Qubrick):
+class TTKMultiplyAdd(Qubrick):
 
     def __init__(self, name=None, **kwargs):
         super().__init__(name, **kwargs)
