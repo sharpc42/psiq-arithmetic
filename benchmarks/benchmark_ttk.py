@@ -14,4 +14,4 @@ class BenchmarkTTKPlots(BenchmarkResults):
 
 if __name__ == "__main__":
     bwp = BenchmarkTTKPlots()
-    bwp.create_benchmark_plots(a=2, b=1, c=2, d=-1, in_place=True)
+    bwp.create_individual_plots(a=2, b=1, c=2, d=-1, in_place=True)

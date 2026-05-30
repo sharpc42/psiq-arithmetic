@@ -14,4 +14,4 @@ class BenchmarkWangPlots(BenchmarkResults):
 
 if __name__ == "__main__":
     bwp = BenchmarkWangPlots()
-    bwp.create_benchmark_plots(a=3, b=1)
+    bwp.create_individual_plots(a=3, b=1, c=1, d=0)

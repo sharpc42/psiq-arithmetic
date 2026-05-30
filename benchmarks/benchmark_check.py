@@ -6,17 +6,34 @@ import matplotlib.pyplot as plt
 class BenchmarkResults:
     adder = None
     adder_name = ""
-    def create_benchmark_plots(self, a=1, b=0, c=1, d=0, in_place=False):
+    def create_individual_plots(
+        self, 
+        a=None, 
+        b=None, 
+        c=None, 
+        d=None, 
+        in_place=False,
+        max_qubits = 50,
+    ) -> None:
         qubits_arr    = []
         toffs_arr     = []
         qubits_theory = []
         toffs_theory  = []
         rhs_val = 1
-        max_qubits = 50
         for n in range(1,max_qubits):
             lhs_val = int(2**n) - 2
             # num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
-            qpu = QPU(num_qubits = a*n + b, filters=BIT_DEFAULT)
+            if a is not None or b is not None:
+                qpu = QPU(num_qubits = a*n + b, filters=BIT_DEFAULT)
+            else:
+                qpu = QPU(
+                    num_qubits = max(
+                        lhs_val.bit_length(),
+                        (a + b).bit_length(),
+                        2*lhs_val.bit_length() + 1,
+                        2,
+                    ), 
+                    filters=BIT_DEFAULT)
             qpu.enable_qubit_allocation_debugging()
             if not in_place:
                 lhs = Qubits(n, "lhs", qpu=qpu)
@@ -29,8 +46,11 @@ class BenchmarkResults:
             resources = resource_estimator(qpu).resources()
             qubits_arr.append(resources["qubit_highwater"])
             toffs_arr.append(resources["toffs"])
-            qubits_theory.append(a*n + b)
-            toffs_theory.append(c*n + d)
+            if a is not None or b is not None:
+                qubits_theory.append(a*n + b)
+            if c is not None or d is not None:
+                toffs_theory.append(c*n + d)
+            self.adder.uncompute()
         qubits = [n for n in range(1, max_qubits)]
 
         plt.style.use('seaborn-v0_8-whitegrid')
@@ -44,7 +64,8 @@ class BenchmarkResults:
             qubits_arr, 
             label=f"{self.adder_name.capitalize()} (measured)"
         )
-        ax.plot(qubits, qubits_theory, ls="-", color="orange", label="Ideal: 3n + 1")
+        if len(qubits_theory) > 0:
+            ax.plot(qubits, qubits_theory, ls="-", color="orange", label="Ideal: 3n + 1")
         ax.set_title("Logical Qubit Count vs n")
         ax.set_xlabel("Input Size (n)")
         ax.set_ylabel("Logical Qubits")
@@ -55,12 +76,13 @@ class BenchmarkResults:
             framealpha=1.0,
             fancybox=True,
         )
-        plt.savefig(f"benchmarks/images/{self.adder_name}_qubit.png")
+        plt.savefig(f"benchmarks/images/test_{self.adder_name}_qubit.png")
         plt.close()
 
         fig, ax = plt.subplots()
         ax.scatter(qubits, toffs_arr, label=f"{self.adder_name} (measured)")
-        ax.plot(qubits, toffs_theory, ls="-", color="orange", label="Ideal: n")
+        if len(toffs_theory) > 0:
+            ax.plot(qubits, toffs_theory, ls="-", color="orange", label="Ideal: n")
         ax.set_title("Toffoli Count vs n")
         ax.set_xlabel("Input Size (n)")
         ax.set_ylabel("Toffoli Gates")
@@ -71,5 +93,5 @@ class BenchmarkResults:
             framealpha=1.0,
             fancybox=True,
         )
-        plt.savefig(f"benchmarks/images/{self.adder_name}_toffs.png")
+        plt.savefig(f"benchmarks/images/test_{self.adder_name}_toffs.png")
         plt.close()
