@@ -1,6 +1,6 @@
 # psiq-arithemtic
 
-Implementing arithmetic algorithms in PsiQuantum Workbench as part of the EE 522 mentorship program at the University of Washington.
+Implementing arithmetic algorithms in PsiQuantum Workbench as part of the EE 522 mentorship program at the University of Washington. This requires [psiqdk](https://github.com/PsiQ/psiqdk) from PsiQuantum.
 
 The currently implemented algorithms are:
 
