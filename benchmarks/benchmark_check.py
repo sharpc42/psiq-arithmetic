@@ -29,7 +29,7 @@ class BenchmarkResults:
                 qpu = QPU(
                     num_qubits = max(
                         lhs_val.bit_length(),
-                        (a + b).bit_length(),
+                        (lhs_val + rhs_val).bit_length(),
                         2*lhs_val.bit_length() + 1,
                         2,
                     ), 
