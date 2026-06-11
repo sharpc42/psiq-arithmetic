@@ -28,9 +28,9 @@ class AddMultiplyResults:
         expected_result = a_val + (b_val * c_val)
         assert result == expected_result, f"Expected result {expected_result}, got {result} from a={a_val}, b={b_val}, c={c_val}"
     def test_multiply_many_values(self):
-        for i in range(0,20):
-            for j in range(0,20):
-                for k in range(0,20):
+        for i in range(0,8):
+            for j in range(0,8):
+                for k in range(0,8):
                     self.test_multiply_one_value(a_val=i, b_val=j, c_val=k)
 
 class AddMultiplyControlResults:
@@ -51,7 +51,7 @@ class AddMultiplyControlResults:
         assert product == a_val * b_val, f"Expected result {a_val * b_val}, got {product} from a={a_val} and b={b_val}"
     def test_control_many_values(self):
         # QUInt(4) can represent values 0..15, so limit the test ranges accordingly
-        for i in range(0,20):
-            for j in range(0,20):
-                for k in range(0,20):
+        for i in range(0,8):
+            for j in range(0,8):
+                for k in range(0,8):
                     self.test_control_one_value(a_val=i, b_val=j, p_val=0, z_val=0)

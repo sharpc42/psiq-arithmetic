@@ -33,9 +33,21 @@ class WangAdd(Qubrick):
             self.set_result_qreg(lhs)
         else:
             self.set_result_qreg(c_0)
+
+        # Single-bit fast path: with one qubit there is no carry chain, so the
+        # sum bit is simply lhs[0] ^ rhs[0] (and, mod 2, the difference too),
+        # with carry-out lhs[0] & rhs[0]. The general final layer below indexes
+        # lhs[num_qubits - 2], which for num_qubits == 1 silently wraps to
+        # lhs[-1] and corrupts the result.
+        if num_qubits == 1:
+            if not result_is_sum_not_carry:
+                c_0.x(cond=lhs[0] | rhs[0])
+            lhs[0].x(cond=rhs[0])
+            return
+
         # initialize auxiliary qubits
         aux = self.alloc_temp_qreg(
-            num_qubits, 
+            num_qubits,
             "aux",
         )
 
