@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.qbk_ttk import TTKAdd
-from src.qbk_ttkmult import TTKAddMultiply
+from src.qbk_ttkmult import TTKMultiplyAdd
 from tests.add_results import AddResultsInPlace
 from tests.add_consistency import ConsistencyResultsInPlace
 from tests.mult_results import AddMultiplyResults
@@ -16,4 +16,4 @@ class TestTTKAddResults(AddResultsInPlace):
 class TestWangAddConsistency(ConsistencyResultsInPlace):
     adder = TTKAdd()
 class TestTTKMultiplyResults(AddMultiplyResults):
-    multiplier = TTKAddMultiply()
+    multiplier = TTKMultiplyAdd()
