@@ -30,7 +30,7 @@ class WangAdd(Qubrick):
         # initialize carry qubit
         c_0 = self.alloc_temp_qreg(1, "carry")[0]
         if result_is_sum_not_carry:
-            self.set_result_qreg(lhs)
+            self.set_result_qreg(lhs | c_0)
         else:
             self.set_result_qreg(c_0)
 
@@ -61,8 +61,11 @@ class WangAdd(Qubrick):
         lhs[0].x(cond=rhs[0] | c_0)        # a_0 -> c_1
         # iterate through layers
         for idx in range(num_qubits - 1):  
-            lhs[idx].x(cond=aux[idx])      # c_j -> s_j
-            rhs[idx].x(cond=aux[idx])      # b_j -> a_j
+            if idx == 0:
+                c_0.x(cond=aux[0])             # c_0 -> s_0
+            else:
+                lhs[idx - 1].x(cond=aux[idx])  # c_j -> s_j
+            rhs[idx].x(cond=aux[idx])          # b_j -> a_j
             # s1 layer
             aux[idx+1].x(cond=rhs[idx+1])
             rhs[idx+1].x(cond=lhs[idx+1])
@@ -71,6 +74,8 @@ class WangAdd(Qubrick):
         # final s2 layer
         lhs[num_qubits - 2].x(cond=aux[-1])
         rhs[-1].x(cond=aux[-1])
+        for idx in range(num_qubits):
+            c_0.swap(lhs[idx])
 
     def _compute(
             self, 
@@ -79,7 +84,7 @@ class WangAdd(Qubrick):
             num_qubits : int = 1,
             subtract_condition : bool = False,
         ) -> None:
-        
+
         if not isinstance(lhs, (Qubits, QUInt)) or not isinstance(rhs, (Qubits, QUInt)):
             raise TypeError("lhs and rhs must be of type QUInt or Qubits")
         required_qubits = len(lhs) + len(rhs) + num_qubits + 1 
