@@ -1,4 +1,0 @@
-psiqdk
-
-[test]
-pytest>=7.0
