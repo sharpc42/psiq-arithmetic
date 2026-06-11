@@ -7,9 +7,9 @@ name = "ee522psiquantum"
 version = "0.1.0"
 description = "Quantum adder and multiplier qubricks for EE522psiquantum."
 readme = "docs/README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
-    "psiqworkbench"
+    "psiqdk"
 ]
 authors = [
     {name = "Kush Aggarwal"},
@@ -18,8 +18,9 @@ authors = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Quantum Computing"
 ]
 
