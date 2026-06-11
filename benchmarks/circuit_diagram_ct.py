@@ -29,7 +29,7 @@ def draw_ct(n, save_dir=None, dpi=600):
     a = QUInt(n, "a", qpu=qpu)
     b = QUInt(n, "b", qpu=qpu)
     c = QUInt(n, "c", qpu=qpu)
-    ct.compute(A=a, B=b, C=c)
+    ct.compute(lhs=a, rhs=b, sum=c)
 
     # render: svg -> png
     out = os.path.join(save_dir, f"ct_circuit_n{n}.png")

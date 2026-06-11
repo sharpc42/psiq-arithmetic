@@ -12,7 +12,7 @@ def test_adder_one_value(num_qubits=4, a_val=5, b_val=6):
     c = QUInt(num_qubits, "c", qpu=qpu)
     a.write(a_val)
     b.write(b_val)
-    ct.compute(A=a, B=b, C=c)
+    ct.compute(lhs=a, rhs=b, sum=c)
     result = c.read()
     expected = (a_val + b_val) % (1 << num_qubits)
     assert result == expected, f"Expected {expected}, got {result}"
