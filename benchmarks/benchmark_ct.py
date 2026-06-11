@@ -32,7 +32,7 @@ def _run_one(ct, n):
     a = QUInt(n, "a", qpu=qpu)
     b = QUInt(n, "b", qpu=qpu)
     c = QUInt(n, "c", qpu=qpu)
-    ct.compute(A=a, B=b, C=c)
+    ct.compute(lhs=a, rhs=b, sum=c)
 
     w = qpu.witness
     m = w.get_all_metrics()

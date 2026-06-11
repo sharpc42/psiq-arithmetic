@@ -29,10 +29,9 @@ class BenchmarkResults:
                 qpu = QPU(
                     num_qubits = max(
                         lhs_val.bit_length(),
-                        (a + b).bit_length(),
                         2*lhs_val.bit_length() + 1,
                         2,
-                    ), 
+                    ),
                     filters=BIT_DEFAULT)
             qpu.enable_qubit_allocation_debugging()
             if not in_place:
