@@ -23,7 +23,7 @@ class BenchmarkResults:
         for n in range(1,max_qubits):
             lhs_val = int(2**n) - 2
             # num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
-            if a is not None or b is not None:
+            if a is not None and b is not None:
                 qpu = QPU(num_qubits = a*n + b, filters=BIT_DEFAULT)
             else:
                 qpu = QPU(
