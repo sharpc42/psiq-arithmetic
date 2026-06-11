@@ -67,9 +67,8 @@ class WangAdd(Qubrick):
             num_qubits : int = 1,
             subtract_condition : bool = False,
         ) -> None:
-
-        if ((type(lhs) != Qubits and type(lhs) != QUInt) 
-            or type(rhs) != Qubits and type(rhs) != QUInt):
+        
+        if not isinstance(lhs, (Qubits, QUInt)) or not isinstance(rhs, (Qubits, QUInt)):
             raise TypeError("lhs and rhs must be of type QUInt or Qubits")
         required_qubits = len(lhs) + len(rhs) + num_qubits + 1 
         if lhs.qpu.num_qubits < required_qubits:
