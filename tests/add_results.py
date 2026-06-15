@@ -9,14 +9,15 @@ class AddResultsOutOfPlace:
         b_val=11
     ):
         num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
-        qpu = QPU(num_qubits=3*num_qubits+1, filters=BIT_DEFAULT)
+        qpu = QPU(num_qubits=4*num_qubits+2, filters=BIT_DEFAULT)
         qpu.enable_qubit_allocation_debugging()
         a = Qubits(num_qubits, "a", qpu=qpu)
         b = Qubits(num_qubits, "b", qpu=qpu)
         a.write(a_val)
         b.write(b_val)
         with self.adder.computed(lhs=a, rhs=b, num_qubits=num_qubits) as result:
-            assert result == a_val + b_val, f"Expected {a_val + b_val}, got {result}"
+            got = result.read()
+            assert got == a_val + b_val, f"Expected {a_val + b_val}, got {got}"
     def test_adder_many_values(self):
         for i in range(1,32):
             for j in range(0,32):
@@ -53,19 +54,20 @@ class SubtractResultsOutOfPlace:
         b_val = 5,
     ):
         num_qubits = max(a_val.bit_length(), b_val.bit_length(), (a_val + b_val).bit_length())
-        qpu = QPU(num_qubits=3*num_qubits+1, filters=BIT_DEFAULT)
+        qpu = QPU(num_qubits=4*num_qubits+2, filters=BIT_DEFAULT)
         qpu.enable_qubit_allocation_debugging()
         a = Qubits(num_qubits, "a", qpu=qpu)
         b = Qubits(num_qubits, "b", qpu=qpu)
         a.write(a_val)
         b.write(b_val)
         with self.adder.computed(
-            lhs = a, 
-            rhs = b, 
+            lhs = a,
+            rhs = b,
             num_qubits = num_qubits,
             subtract_condition = True,
         ) as result:
-            assert result == a_val - b_val, f"Expected {a_val - b_val}, got {result}"
+            got = result.read()
+            assert got == a_val - b_val, f"Expected {a_val - b_val}, got {got}"
     def test_subtract_many_values(self):
         for i in range(1,32):
             for j in range(1,32):
