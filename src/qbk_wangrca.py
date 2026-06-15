@@ -45,15 +45,14 @@ class WangAdd(Qubrick):
             num_qubits,
             "aux",
         )
-
-        # initial s1 layer
-        aux[0].x(cond=rhs[0])
-        rhs[0].x(cond=lhs[0])
         if subtract_condition:
             c_0.x()
             rhs.x()
-            plus_one = QUInt(num_qubits, "plus_one", qpu=rhs.qpu)
-            self._add(rhs, plus_one, num_qubits=num_qubits)
+            # plus_one = QUInt(num_qubits, "plus_one", qpu=rhs.qpu)
+            # self._add(rhs, plus_one, num_qubits=num_qubits)
+        # initial s1 layer
+        aux[0].x(cond=rhs[0])
+        rhs[0].x(cond=lhs[0])
         c_0.x(cond=lhs[0])
         lhs[0].x(cond=rhs[0] | c_0)        # a_0 -> c_1
         # iterate through layers
@@ -75,7 +74,7 @@ class WangAdd(Qubrick):
             c_0.swap(lhs[idx])
         # uncompute subtract
         if subtract_condition:
-            self._add(rhs, plus_one, num_qubits=num_qubits, subtract_condition=True)
+            # self._add(rhs, plus_one, num_qubits=num_qubits, subtract_condition=True)
             rhs.x()
             c_0.x()
 
