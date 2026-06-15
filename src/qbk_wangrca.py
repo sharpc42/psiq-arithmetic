@@ -3,16 +3,27 @@ from psiqworkbench import Qubrick, Qubits, QUInt
 class WangAdd(Qubrick):
 
     """
-    Implements the Wang ripple-carry adder. This is an
-    out-of-place adder. The form is sum = lhs + rhs. The 
-    result is returned by calling get_result_qreg() after 
-    compute(). An uncompute() step is required after. The 
-    QPU must have at least 3N+1 qubits for N-bit addition.
-    The lhs and rhs are left unmodified. For larger registers,
-    use a QPU initialized with the BIT_DEFAULT filter preset 
-    for the lhs and rhs registers to utilize the bit-vector 
-    simulator to enable simulation of more qubits. The lhs
-    and rhs registers are required to be Qubits type.
+    Implements the Wang ripple-carry adder (Wang et al. 2016).
+
+    Out-of-place reversible adder. The result is written into the
+    (n+1)-qubit register ``lhs | c_0``: the low n bits hold the sum and
+    the top bit holds the carry-out. Use the context manager and read
+    the value off the result register, e.g.::
+
+        with WangAdd().computed(lhs=a, rhs=b, num_qubits=n) as result:
+            value = result.read()
+
+    ``compute()`` runs the addition; ``uncompute()`` (invoked
+    automatically on exit of the ``computed`` block) restores ``lhs``
+    and ``rhs`` to their original values.
+
+    Pass ``subtract_condition=True`` to compute ``lhs - rhs`` instead,
+    via two's complement.
+
+    The QPU must have at least 3N+1 qubits for N-bit operands. For
+    larger registers, initialize the QPU with the BIT_DEFAULT filter
+    preset to use the bit-vector simulator. The lhs and rhs registers
+    are required to be Qubits (or QUInt) type.
     """
 
     def __init__(self, name=None, **kwargs):
@@ -24,20 +35,17 @@ class WangAdd(Qubrick):
             rhs : QUInt | Qubits,
             num_qubits : int = 1,
             subtract_condition : bool = False,
-            result_is_sum_not_carry : bool = True,
         ) -> None:
 
         # initialize carry qubit
         c_0 = self.alloc_temp_qreg(1, "carry")[0]
-        if result_is_sum_not_carry:
-            self.set_result_qreg(lhs | c_0)
-        else:
-            self.set_result_qreg(c_0)
+        # result is the (n+1)-qubit register lhs|c_0: low n bits hold the sum,
+        # the top bit (c_0) holds the carry-out.
+        self.set_result_qreg(lhs | c_0)
 
         if num_qubits == 1:
-            if not result_is_sum_not_carry:
-                c_0.x(cond=lhs[0] | rhs[0])
-            lhs[0].x(cond=rhs[0])
+            c_0.x(cond=lhs[0] | rhs[0])   # carry-out = a0 & b0  (top bit of lhs|c_0)
+            lhs[0].x(cond=rhs[0])         # sum bit = a0 ^ b0
             return
 
         # initialize auxiliary qubits
@@ -46,10 +54,9 @@ class WangAdd(Qubrick):
             "aux",
         )
         if subtract_condition:
+            # two's complement: lhs - rhs = lhs + ~rhs + 1
             c_0.x()
             rhs.x()
-            # plus_one = QUInt(num_qubits, "plus_one", qpu=rhs.qpu)
-            # self._add(rhs, plus_one, num_qubits=num_qubits)
         # initial s1 layer
         aux[0].x(cond=rhs[0])
         rhs[0].x(cond=lhs[0])
@@ -70,11 +77,13 @@ class WangAdd(Qubrick):
         # final s2 layer
         lhs[num_qubits - 2].x(cond=aux[-1])
         rhs[-1].x(cond=aux[-1])
+        # Sum bit s_j is written one index low (s_0 into c_0, s_j into lhs[j-1]);
+        # this cyclic rotation of [lhs[0..n-1], c_0] by one realigns them so that
+        # the result register lhs|c_0 reads out correctly.
         for idx in range(num_qubits):
             c_0.swap(lhs[idx])
-        # uncompute subtract
+        # uncompute the two's-complement input transform to restore rhs
         if subtract_condition:
-            # self._add(rhs, plus_one, num_qubits=num_qubits, subtract_condition=True)
             rhs.x()
             c_0.x()
 
